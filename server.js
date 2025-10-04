@@ -12,7 +12,7 @@ const io = new Server(server, {
     origin: "*",
     methods: ["GET", "POST"]
   }
-});a
+});
 
 // Color palette for user highlights (must match frontend)
 const colorPalette = [
