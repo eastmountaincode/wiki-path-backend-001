@@ -16,21 +16,17 @@ const io = new Server(server, {
 
 // Color palette for user highlights (must match frontend)
 const colorPalette = [
-  '#FFB3BA', // Light pink
-  '#FFDFBA', // Light peach
-  '#FFFFBA', // Light yellow
-  '#BAFFC9', // Light mint
-  '#BAE1FF', // Light sky blue
-  '#E0BBE4', // Light lavender
-  '#FFD6A5', // Light apricot
-  '#FDFFB6', // Pale yellow
-  '#CAFFBF', // Pale mint
-  '#9BF6FF', // Pale cyan
-  '#A0C4FF', // Pale blue
-  '#FFC6FF', // Pale pink
-  '#FDCAE1', // Pale rose
-  '#FFDAB9', // Peach puff
-  '#E6E6FA'  // Lavender
+  '#970302', // Red
+  '#E679A6', // Pink
+  '#EE8019', // Orange
+  '#F0BC00', // Yellow
+  '#5748B5', // Purple
+  '#305D70', // Dark green
+  '#0E65C0', // Blue
+  '#049DFF', // Bright Blue
+  '#E9E7C4', // Bright Yellow
+  '#308557', // Green
+  '#71D1B3'  // Bright Green
 ];
 
 // Store active rooms and users
