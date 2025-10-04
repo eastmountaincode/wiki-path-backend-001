@@ -36,6 +36,10 @@ const rooms = new Map();
 // Track which color is used in each room
 const roomColors = new Map();
 
+// Store historical paths for each room
+// Structure: { roomId: { userId: { color, path: [] } } }
+const historicalPaths = new Map();
+
 // Get an available color for a room
 function getAvailableColor(roomId) {
   if (!roomColors.has(roomId)) {
@@ -105,6 +109,20 @@ io.on('connection', (socket) => {
     
     // Send current users in room to new user
     socket.emit('room-users', room.users);
+    
+    // Send historical paths for this room
+    if (historicalPaths.has(roomId)) {
+      const roomPaths = historicalPaths.get(roomId);
+      const pathsArray = Object.entries(roomPaths).map(([userId, data]) => ({
+        userId,
+        color: data.color,
+        path: data.path
+      }));
+      socket.emit('historical-paths', { paths: pathsArray });
+      console.log(`📜 Sent ${pathsArray.length} historical paths to ${socket.id}`);
+    } else {
+      socket.emit('historical-paths', { paths: [] });
+    }
     
     // Notify other users in room about new user
     socket.to(roomId).emit('user-joined', {
@@ -176,6 +194,31 @@ io.on('connection', (socket) => {
     });
     
     console.log(`✅ User ${socket.id} selected word: "${text}" at index ${wordIndex}`);
+  });
+  
+  // Save user's path
+  socket.on('save-path', (data) => {
+    if (!currentRoom) return;
+    
+    const room = rooms.get(currentRoom);
+    if (!room || !room.users[socket.id]) return;
+    
+    const user = room.users[socket.id];
+    const { path } = data;
+    
+    // Initialize room in historicalPaths if needed
+    if (!historicalPaths.has(currentRoom)) {
+      historicalPaths.set(currentRoom, {});
+    }
+    
+    // Store the path for this user
+    const roomPaths = historicalPaths.get(currentRoom);
+    roomPaths[socket.id] = {
+      color: user.color,
+      path: path
+    };
+    
+    console.log(`💾 Saved path for ${socket.id} in room ${currentRoom}: ${path.length} words`);
   });
   
   // User disconnects
