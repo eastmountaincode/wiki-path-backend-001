@@ -12,7 +12,7 @@ const io = new Server(server, {
     origin: "*",
     methods: ["GET", "POST"]
   }
-});
+});a
 
 // Color palette for user highlights (must match frontend)
 const colorPalette = [
@@ -144,6 +144,38 @@ io.on('connection', (socket) => {
       line: line,
       positionInLine: positionInLine
     });
+  });
+  
+  // User selects a word (with speech)
+  socket.on('select-emit', (data) => {
+    console.log('📥 SERVER RECEIVED select-emit from', socket.id, 'data:', data);
+    
+    if (!currentRoom) {
+      console.log('⚠️ No current room for', socket.id);
+      return;
+    }
+    
+    const room = rooms.get(currentRoom);
+    if (!room || !room.users[socket.id]) {
+      console.log('⚠️ Room or user not found for', socket.id);
+      return;
+    }
+    
+    const user = room.users[socket.id];
+    const { wordIndex, line, positionInLine, text } = data;
+    
+    // Broadcast selection to other users in room
+    console.log('📤 SERVER BROADCASTING select-receive to room:', currentRoom);
+    socket.to(currentRoom).emit('select-receive', {
+      id: socket.id,
+      color: user.color,
+      position: wordIndex,
+      line: line,
+      positionInLine: positionInLine,
+      text: text
+    });
+    
+    console.log(`✅ User ${socket.id} selected word: "${text}" at index ${wordIndex}`);
   });
   
   // User disconnects
