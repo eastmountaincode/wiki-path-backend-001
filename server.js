@@ -20,7 +20,7 @@ const colorInstrumentMap = {
   '#E679A6': 'DuoSynth',     // Pink
   '#EE8019': 'FMSynth',      // Orange
   '#F0BC00': 'MembraneSynth', // Yellow
-  '#5748B5': 'MetalSynth',   // Purple
+  '#5748B5': 'PolySynth',    // Purple
   '#305D70': 'MonoSynth',    // Dark green
   '#0E65C0': 'NoiseSynth',   // Blue
   '#049DFF': 'PluckSynth',   // Bright Blue
