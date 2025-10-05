@@ -14,30 +14,22 @@ const io = new Server(server, {
   }
 });
 
-// Color palette for user highlights (must match frontend)
-const colorPalette = [
-  '#970302', // Red
-  '#E679A6', // Pink
-  '#EE8019', // Orange
-  '#F0BC00', // Yellow
-  '#5748B5', // Purple
-  '#305D70', // Dark green
-  '#0E65C0', // Blue
-  '#049DFF', // Bright Blue
-  '#E9E7C4', // Bright Yellow
-  '#308557', // Green
-  '#71D1B3'  // Bright Green
-];
+// Color palette for user highlights with matched instruments
+const colorInstrumentMap = {
+  '#970302': 'AMSynth',      // Red
+  '#E679A6': 'DuoSynth',     // Pink
+  '#EE8019': 'FMSynth',      // Orange
+  '#F0BC00': 'MembraneSynth', // Yellow
+  '#5748B5': 'MetalSynth',   // Purple
+  '#305D70': 'MonoSynth',    // Dark green
+  '#0E65C0': 'NoiseSynth',   // Blue
+  '#049DFF': 'PluckSynth',   // Bright Blue
+  '#E9E7C4': 'PolySynth',    // Bright Yellow
+  '#308557': 'Synth',        // Green
+  '#71D1B3': 'FMSynth'       // Bright Green
+};
 
-// Instrument options for Tone.js
-const instruments = [
-  'Synth',
-  'AMSynth',
-  'FMSynth',
-  'MembraneSynth',
-  'PluckSynth',
-  'MetalSynth'
-];
+const colorPalette = Object.keys(colorInstrumentMap);
 
 // Store active rooms and users
 // Structure: { roomId: { users: { socketId: { color, position, trail } } } }
@@ -105,8 +97,8 @@ io.on('connection', (socket) => {
     // Assign color to user
     userColor = getAvailableColor(roomId);
     
-    // Assign random instrument to user
-    const userInstrument = instruments[Math.floor(Math.random() * instruments.length)];
+    // Get instrument matched to the color
+    const userInstrument = colorInstrumentMap[userColor];
     
     // Add user to room
     const room = rooms.get(roomId);
