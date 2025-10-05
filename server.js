@@ -50,15 +50,17 @@ function getAvailableColor(roomId) {
   
   const usedColors = roomColors.get(roomId);
   
-  // Find first unused color
-  for (const color of colorPalette) {
-    if (!usedColors.has(color)) {
-      usedColors.add(color);
-      return color;
-    }
+  // Get all unused colors
+  const availableColors = colorPalette.filter(color => !usedColors.has(color));
+  
+  // If there are available colors, pick one randomly
+  if (availableColors.length > 0) {
+    const randomColor = availableColors[Math.floor(Math.random() * availableColors.length)];
+    usedColors.add(randomColor);
+    return randomColor;
   }
   
-  // If all colors used, pick random one
+  // If all colors used, pick random one from all colors
   return colorPalette[Math.floor(Math.random() * colorPalette.length)];
 }
 
@@ -96,9 +98,11 @@ io.on('connection', (socket) => {
     
     // Assign color to user
     userColor = getAvailableColor(roomId);
+    console.log(`🎨 Assigned color to ${socket.id}: ${userColor}`);
     
     // Get instrument matched to the color
     const userInstrument = colorInstrumentMap[userColor];
+    console.log(`🎸 Mapped to instrument: ${userInstrument}`);
     
     // Add user to room
     const room = rooms.get(roomId);
