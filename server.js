@@ -136,6 +136,22 @@ io.on('connection', (socket) => {
       socket.emit('historical-paths', { paths: [] });
     }
     
+    // Send saved selected paths for this room
+    if (historicalPaths.has(roomId)) {
+      const roomPaths = historicalPaths.get(roomId);
+      const selectedPathsArray = Object.entries(roomPaths)
+        .filter(([userId, data]) => data.selectedWords && data.selectedWords.length > 0)
+        .map(([userId, data]) => ({
+          userId,
+          color: data.color,
+          selectedWords: data.selectedWords
+        }));
+      socket.emit('saved-selected-paths', { selectedPaths: selectedPathsArray });
+      console.log(`📝 Sent ${selectedPathsArray.length} saved selected paths to ${socket.id}`);
+    } else {
+      socket.emit('saved-selected-paths', { selectedPaths: [] });
+    }
+    
     // Notify other users in room about new user
     socket.to(roomId).emit('user-joined', {
       id: socket.id,
@@ -233,6 +249,34 @@ io.on('connection', (socket) => {
     };
     
     console.log(`💾 Saved path for ${socket.id} in room ${currentRoom}: ${path.length} words`);
+  });
+  
+  // Save user's selected words
+  socket.on('save-selected-words', (data) => {
+    if (!currentRoom) return;
+    
+    const room = rooms.get(currentRoom);
+    if (!room || !room.users[socket.id]) return;
+    
+    const user = room.users[socket.id];
+    const { selectedWords } = data;
+    
+    // Initialize room in historicalPaths if needed
+    if (!historicalPaths.has(currentRoom)) {
+      historicalPaths.set(currentRoom, {});
+    }
+    
+    // Store the selected words for this user (in addition to their path)
+    const roomPaths = historicalPaths.get(currentRoom);
+    if (!roomPaths[socket.id]) {
+      roomPaths[socket.id] = {
+        color: user.color,
+        path: []
+      };
+    }
+    roomPaths[socket.id].selectedWords = selectedWords;
+    
+    console.log(`📝 Saved selected words for ${socket.id} in room ${currentRoom}: ${selectedWords.length} words`);
   });
   
   // User disconnects
