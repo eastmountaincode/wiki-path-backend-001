@@ -279,6 +279,22 @@ io.on('connection', (socket) => {
     console.log(`📝 Saved selected words for ${socket.id} in room ${currentRoom}: ${selectedWords.length} words`);
   });
   
+  // When overlap is detected, broadcast to everyone in the room
+  socket.on('overlap-start', ({ href, myIndex, otherIndex }) => {
+    if (currentRoom) {
+      console.log(`🤝 Overlap started by ${socket.id} in room ${currentRoom}: ${href}`);
+      io.to(currentRoom).emit('overlap-start', { href, myIndex, otherIndex });
+    }
+  });
+
+  // When overlap ends, broadcast to everyone in the room
+  socket.on('overlap-end', () => {
+    if (currentRoom) {
+      console.log(`👋 Overlap ended by ${socket.id} in room ${currentRoom}`);
+      io.to(currentRoom).emit('overlap-end');
+    }
+  });
+
   // When a user triggers a redirect-link event, broadcast it to everyone in the same room
   socket.on('redirect-link', ({ href }) => {
     if (currentRoom) {
