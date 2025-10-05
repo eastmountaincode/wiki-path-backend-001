@@ -139,8 +139,12 @@ io.on('connection', (socket) => {
     // Send saved selected paths for this room
     if (historicalPaths.has(roomId)) {
       const roomPaths = historicalPaths.get(roomId);
+      console.log(`🔍 Room paths for ${roomId}:`, Object.keys(roomPaths));
       const selectedPathsArray = Object.entries(roomPaths)
-        .filter(([userId, data]) => data.selectedWords && data.selectedWords.length > 0)
+        .filter(([userId, data]) => {
+          console.log(`  - User ${userId}: has selectedWords?`, !!data.selectedWords, data.selectedWords?.length);
+          return data.selectedWords && data.selectedWords.length > 0;
+        })
         .map(([userId, data]) => ({
           userId,
           color: data.color,
@@ -149,6 +153,7 @@ io.on('connection', (socket) => {
       socket.emit('saved-selected-paths', { selectedPaths: selectedPathsArray });
       console.log(`📝 Sent ${selectedPathsArray.length} saved selected paths to ${socket.id}`);
     } else {
+      console.log(`⚠️ No historical paths for room ${roomId}`);
       socket.emit('saved-selected-paths', { selectedPaths: [] });
     }
     
@@ -261,9 +266,12 @@ io.on('connection', (socket) => {
     const user = room.users[socket.id];
     const { selectedWords } = data;
     
+    console.log(`📝 Saving selected words for ${socket.id} in room ${currentRoom}: ${selectedWords.length} words`);
+    
     // Initialize room in historicalPaths if needed
     if (!historicalPaths.has(currentRoom)) {
       historicalPaths.set(currentRoom, {});
+      console.log(`  - Created new historicalPaths entry for room ${currentRoom}`);
     }
     
     // Store the selected words for this user (in addition to their path)
@@ -273,10 +281,12 @@ io.on('connection', (socket) => {
         color: user.color,
         path: []
       };
+      console.log(`  - Created new user entry for ${socket.id}`);
     }
     roomPaths[socket.id].selectedWords = selectedWords;
     
-    console.log(`📝 Saved selected words for ${socket.id} in room ${currentRoom}: ${selectedWords.length} words`);
+    console.log(`✅ Successfully saved. Room now has ${Object.keys(roomPaths).length} users with data`);
+    console.log(`  - Data for ${socket.id}:`, roomPaths[socket.id]);
   });
   
   // When overlap is detected, broadcast to everyone in the room
