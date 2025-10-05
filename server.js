@@ -279,6 +279,14 @@ io.on('connection', (socket) => {
     console.log(`📝 Saved selected words for ${socket.id} in room ${currentRoom}: ${selectedWords.length} words`);
   });
   
+  // When a user triggers a redirect-link event, broadcast it to everyone in the same room
+  socket.on('redirect-link', ({ href }) => {
+    if (currentRoom) {
+      console.log(`🔗 Redirect triggered by ${socket.id} in room ${currentRoom}: ${href}`);
+      io.to(currentRoom).emit('redirect-link', { href });
+    }
+  });
+  
   // User disconnects
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
