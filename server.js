@@ -29,6 +29,16 @@ const colorPalette = [
   '#71D1B3'  // Bright Green
 ];
 
+// Instrument options for Tone.js
+const instruments = [
+  'Synth',
+  'AMSynth',
+  'FMSynth',
+  'MembraneSynth',
+  'PluckSynth',
+  'MetalSynth'
+];
+
 // Store active rooms and users
 // Structure: { roomId: { users: { socketId: { color, position, trail } } } }
 const rooms = new Map();
@@ -95,17 +105,23 @@ io.on('connection', (socket) => {
     // Assign color to user
     userColor = getAvailableColor(roomId);
     
+    // Assign random instrument to user
+    const userInstrument = instruments[Math.floor(Math.random() * instruments.length)];
+    
     // Add user to room
     const room = rooms.get(roomId);
     room.users[socket.id] = {
       id: socket.id,
       color: userColor,
+      instrument: userInstrument,
       position: 0,
       trail: []
     };
     
-    // Send assigned color to user
+    // Send assigned color and instrument to user
     socket.emit('user-color', userColor);
+    socket.emit('user-instrument', userInstrument);
+    console.log(`🎸 Assigned instrument to ${socket.id}: ${userInstrument}`);
     
     // Send current users in room to new user
     socket.emit('room-users', room.users);
@@ -128,6 +144,7 @@ io.on('connection', (socket) => {
     socket.to(roomId).emit('user-joined', {
       id: socket.id,
       color: userColor,
+      instrument: userInstrument,
       position: 0,
       trail: []
     });
@@ -158,6 +175,7 @@ io.on('connection', (socket) => {
     socket.to(currentRoom).emit('user-moved', {
       id: socket.id,
       color: user.color,
+      instrument: user.instrument,
       position: wordIndex,
       line: line,
       positionInLine: positionInLine
